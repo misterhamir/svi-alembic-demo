@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI Alembic - Case Detail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #031634;
+            --color-primary-hover: #1A2B4A;
+            --color-primary-light: #f2f4f6;
+            --color-background: #f8f9fb;
+            --color-surface: #f2f4f6;
+            --color-text-primary: #031634;
+            --color-text-secondary: #44474e;
+            --color-border: #e1e2e4;
+            --color-success: #385723;
+            --color-warning: #806000;
+            --color-error: #ba1a1a;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --radius-DEFAULT: 8px;
+        }
+
+        @layer base {
+            body {
+                @apply bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex;
+            }
+        }
+
+        .tab-active { @apply border-primary text-primary border-b-2; }
+        .tab-inactive { @apply border-transparent text-text-secondary hover:text-text-primary border-b-2; }
+        .field-row { cursor: pointer; }
+        .field-row.active-highlight { @apply ring-2 ring-amber-400; }
+        .bbox-highlight {
+            position: absolute;
+            border: 2px solid #f59e0b;
+            background: rgba(251, 191, 36, 0.25);
+            box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.15);
+            pointer-events: none;
+            transition: opacity 200ms ease;
+        }
+        @keyframes pulseFade { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
+        .bbox-highlight.pulsing { animation: pulseFade 1.6s ease-in-out 2; }
+    </style>
+</head>
+
+<body class="bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <div class="flex h-full w-20 flex-col border-r border-border bg-background shrink-0 items-center py-6 gap-6">
+        <a href="operator-queue.html" class="p-3 bg-primary-light text-primary rounded-lg shadow-sm border border-primary/20" title="Back to queue">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </a>
+        <div class="h-px w-10 bg-border"></div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+
+        <!-- Header -->
+        <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-8">
+            <div class="flex items-center gap-4 min-w-0">
+                <nav class="flex text-xs text-text-secondary uppercase tracking-widest font-bold gap-2 shrink-0">
+                    <a href="operator-queue.html" class="hover:text-primary">MY QUEUE</a>
+                    <span>/</span>
+                    <span id="breadcrumb-id" class="text-text-primary font-mono">…</span>
+                </nav>
+                <div class="h-4 w-px bg-border"></div>
+                <div class="flex items-center gap-2 min-w-0">
+                    <h1 id="case-title" class="text-lg font-bold text-text-primary truncate">Loading…</h1>
+                    <span id="case-status-pill" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border border-gray-200 bg-gray-50 text-gray-600 shrink-0">…</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-text-secondary font-medium shrink-0">
+                <div class="flex flex-col items-end">
+                    <span class="uppercase tracking-widest text-[9px] font-bold text-text-secondary/60">Created</span>
+                    <span id="created-at" class="text-text-primary">—</span>
+                </div>
+                <div class="h-8 w-px bg-border"></div>
+                <div class="flex flex-col items-end">
+                    <span class="uppercase tracking-widest text-[9px] font-bold text-text-secondary/60">Assigned To</span>
+                    <span id="assigned-to" class="text-text-primary">—</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Top Tabs -->
+        <div class="flex px-8 border-b border-border bg-background flex-none">
+            <button data-tab="documents" class="px-6 py-4 text-sm font-bold tracking-wide tab-inactive">DOCUMENTS</button>
+            <button data-tab="data" class="px-6 py-4 text-sm font-bold tracking-wide tab-active">EXTRACTED DATA</button>
+            <button data-tab="history" class="px-6 py-4 text-sm font-bold tracking-wide tab-inactive">HISTORY</button>
+        </div>
+
+        <!-- Split View -->
+        <div class="flex-1 flex overflow-hidden">
+
+            <!-- Left: PDF viewer -->
+            <div class="w-1/2 border-r border-border bg-surface flex flex-col overflow-hidden">
+                <div class="bg-white border-b border-border flex items-center px-4">
+                    <div id="doc-tab-strip" class="flex gap-1 flex-1 overflow-x-auto"></div>
+                </div>
+                <div id="pdf-pages" class="flex-1 overflow-auto p-6 flex flex-col items-center bg-surface">
+                    <div class="p-8 text-center text-text-secondary text-sm">Loading document…</div>
+                </div>
+            </div>
+
+            <!-- Right: Data / History / Documents + Action Bar -->
+            <div class="w-1/2 flex flex-col overflow-hidden">
+
+                <!-- Integration Error Banner -->
+                <div id="error-banner" class="hidden border-b border-red-200 bg-red-50 px-6 py-3 text-sm">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                        <div class="flex-1">
+                            <div class="font-bold text-red-700">ERP integration failed</div>
+                            <div id="error-banner-detail" class="text-red-700/80 text-xs mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto">
+                    <!-- View: Extracted Data -->
+                    <div data-view="data" class="p-6 space-y-6">
+                        <div id="field-groups"></div>
+                    </div>
+
+                    <!-- View: History -->
+                    <div data-view="history" class="hidden p-6">
+                        <ol id="history-list" class="relative border-l border-border ml-3 space-y-6"></ol>
+                    </div>
+
+                    <!-- View: Documents -->
+                    <div data-view="documents" class="hidden p-6">
+                        <div id="documents-summary" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div id="action-bar" class="p-6 border-t border-border bg-background flex flex-col gap-4 shadow-[0_-4px_10px_rgba(0,0,0,0.03)] pb-8">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[10px] uppercase font-black tracking-widest text-text-secondary">Decision Notes</label>
+                        <textarea id="decision-notes" placeholder="Add optional notes for the next stage..." class="w-full border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary min-h-[60px]"></textarea>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="btn-approve" class="bg-primary hover:bg-primary-hover text-white px-6 py-3 font-black uppercase tracking-widest rounded-lg flex-1 transition-all shadow-lg hover:shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed">APPROVE</button>
+                        <button id="btn-retry" class="hidden bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 font-black uppercase tracking-widest rounded-lg flex-1 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">RETRY INTEGRATION</button>
+                        <button id="btn-reject" class="bg-error/10 border border-error/30 text-error hover:bg-error hover:text-white px-6 py-3 font-black uppercase tracking-widest rounded-lg flex-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed">REJECT</button>
+                    </div>
+                    <div id="action-bar-message" class="hidden text-sm text-text-secondary text-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-6 right-6 bg-primary text-white px-4 py-3 rounded-lg shadow-2xl text-sm z-50"></div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+        const params = new URLSearchParams(location.search);
+        const CASE_ID = params.get("id");
+        const ACTOR = "operator_demo";
+
+        let CASE = null;
+        let CURRENT_DOC_INDEX = 0;
+        const PDF_CACHE = {}; // doc_id -> { pdf, pageWrappers: [{wrapper, canvas, overlay, viewport, pageNum}] }
+
+        // ---------- helpers ----------
+        const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        const shortId = (id) => id ? id.replace(/^case_/, "").slice(0, 8).toUpperCase() : "";
+        const formatDateTime = (iso) => {
+            if (!iso) return "—";
+            const d = new Date(iso);
+            return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+        };
+        const humanizeDocType = (t) => ({ commercial_invoice: "Invoice", faktur_pajak: "Faktur Pajak" }[t] || (t || "").replace(/_/g, " "));
+        const humanizeFieldName = (n) => (n || "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+        function band(conf) {
+            if (conf == null) return "gray";
+            if (conf >= 0.85) return "green";
+            if (conf >= 0.70) return "amber";
+            return "red";
+        }
+        const BAND_TEXT = { green: "text-emerald-700", amber: "text-amber-700", red: "text-red-700", gray: "text-gray-500" };
+        const BAND_ROW = { green: "", amber: "bg-amber-50/50", red: "bg-red-50/50", gray: "" };
+
+        const STATUS_LABEL = {
+            pending_review: { text: "Pending Review", pill: "orange" },
+            pending_approval_L1: { text: "Awaiting Approval", pill: "amber" },
+            integration_error: { text: "ERP Error", pill: "red" },
+            complete: { text: "Complete", pill: "emerald" },
+            rejected: { text: "Rejected", pill: "gray" },
+        };
+        const PILL_BG = { orange: "bg-orange-50 text-orange-700 border-orange-200", amber: "bg-amber-50 text-amber-700 border-amber-200", red: "bg-red-50 text-red-700 border-red-200", emerald: "bg-emerald-50 text-emerald-700 border-emerald-200", gray: "bg-gray-50 text-gray-600 border-gray-200" };
+
+        function showToast(msg, isError = false) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.className = `fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-2xl text-sm z-50 ${isError ? "bg-error text-white" : "bg-primary text-white"}`;
+            setTimeout(() => t.classList.add("hidden"), 3500);
+            t.classList.remove("hidden");
+        }
+
+        // ---------- top-level load ----------
+        async function loadCase() {
+            if (!CASE_ID) {
+                document.getElementById("case-title").textContent = "No case id in URL";
+                return;
+            }
+            try {
+                const r = await fetch(`/api/cases/${encodeURIComponent(CASE_ID)}`);
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                CASE = await r.json();
+            } catch (e) {
+                document.getElementById("case-title").textContent = "Failed to load case";
+                showToast(`Failed: ${e.message}`, true);
+                return;
+            }
+            renderHeader();
+            renderDocTabs();
+            renderFieldGroups();
+            renderHistory();
+            renderDocumentsSummary();
+            renderIntegrationError();
+            renderActionBar();
+            await activateDocTab(0);
+        }
+
+        // ---------- header ----------
+        function renderHeader() {
+            document.getElementById("breadcrumb-id").textContent = shortId(CASE.case_id);
+            document.title = `Case ${shortId(CASE.case_id)} — SVI Alembic`;
+            document.getElementById("case-title").textContent = CASE.subject || "(untitled)";
+            const lbl = STATUS_LABEL[CASE.state] || { text: CASE.state, pill: "gray" };
+            const pill = document.getElementById("case-status-pill");
+            pill.textContent = `● ${lbl.text}`;
+            pill.className = `inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border shrink-0 ${PILL_BG[lbl.pill]}`;
+            document.getElementById("created-at").textContent = formatDateTime(CASE.created_at);
+            document.getElementById("assigned-to").textContent = (CASE.responsible?.value || "—").replaceAll("_", " ");
+        }
+
+        // ---------- top tabs (Documents / Data / History) ----------
+        document.querySelectorAll("[data-tab]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+                document.querySelectorAll("[data-tab]").forEach((b) => {
+                    b.classList.toggle("tab-active", b === btn);
+                    b.classList.toggle("tab-inactive", b !== btn);
+                });
+                const tab = btn.dataset.tab;
+                document.querySelectorAll("[data-view]").forEach((v) => {
+                    v.classList.toggle("hidden", v.dataset.view !== tab);
+                });
+            });
+        });
+
+        // ---------- doc tab strip ----------
+        function renderDocTabs() {
+            const strip = document.getElementById("doc-tab-strip");
+            strip.innerHTML = (CASE.documents || []).map((d, i) => {
+                const active = i === CURRENT_DOC_INDEX;
+                return `<button data-doc-index="${i}" class="px-4 py-3 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors ${active ? "border-primary text-primary" : "border-transparent text-text-secondary hover:text-text-primary"}">${escapeHtml(humanizeDocType(d.document_type))}</button>`;
+            }).join("");
+            strip.querySelectorAll("button").forEach((b) => {
+                b.addEventListener("click", () => activateDocTab(parseInt(b.dataset.docIndex, 10)));
+            });
+        }
+
+        async function activateDocTab(idx) {
+            CURRENT_DOC_INDEX = idx;
+            renderDocTabs();
+            const doc = CASE.documents[idx];
+            if (!doc) return;
+            await renderPdf(doc);
+        }
+
+        // ---------- PDF.js render ----------
+        async function renderPdf(doc) {
+            const container = document.getElementById("pdf-pages");
+            container.innerHTML = `<div class="p-8 text-center text-text-secondary text-sm">Loading PDF…</div>`;
+            try {
+                if (!PDF_CACHE[doc.doc_id]) {
+                    const pdfUrl = doc.pdf_url || `/api/cases/${encodeURIComponent(CASE.case_id)}/document/${encodeURIComponent(doc.doc_id)}.pdf`;
+                    const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise;
+                    PDF_CACHE[doc.doc_id] = { pdf, pageWrappers: [] };
+                }
+                const { pdf } = PDF_CACHE[doc.doc_id];
+                container.innerHTML = "";
+                PDF_CACHE[doc.doc_id].pageWrappers = [];
+
+                // Compute scale to fit container width (with some padding)
+                const containerWidth = container.clientWidth - 48;
+                const firstPage = await pdf.getPage(1);
+                const baseViewport = firstPage.getViewport({ scale: 1 });
+                const scale = Math.min(2.0, Math.max(0.8, containerWidth / baseViewport.width));
+
+                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const viewport = page.getViewport({ scale });
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "relative bg-white shadow-lg mb-6";
+                    wrapper.style.width = `${viewport.width}px`;
+                    wrapper.style.height = `${viewport.height}px`;
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    canvas.style.display = "block";
+
+                    const overlay = document.createElement("div");
+                    overlay.className = "absolute inset-0 pointer-events-none";
+
+                    wrapper.appendChild(canvas);
+                    wrapper.appendChild(overlay);
+                    container.appendChild(wrapper);
+
+                    PDF_CACHE[doc.doc_id].pageWrappers.push({ wrapper, canvas, overlay, viewport, pageNum });
+                    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+                }
+            } catch (e) {
+                container.innerHTML = `<div class="p-8 text-center text-error text-sm">Failed to load PDF: ${escapeHtml(e.message)}</div>`;
+            }
+        }
+
+        // ---------- field groups ----------
+        function renderFieldGroups() {
+            const root = document.getElementById("field-groups");
+            root.innerHTML = (CASE.documents || []).map((doc, di) => `
+                <div class="bg-white rounded-lg border border-border shadow-sm overflow-hidden mb-4">
+                    <div class="px-4 py-3 bg-surface border-b border-border flex items-center justify-between">
+                        <div>
+                            <div class="text-xs font-bold uppercase tracking-widest text-text-secondary">${escapeHtml(humanizeDocType(doc.document_type))}</div>
+                            <div class="text-[10px] text-text-secondary/70 font-mono mt-0.5">${escapeHtml(doc.schema_id || "")}</div>
+                        </div>
+                        <span class="text-[10px] text-text-secondary uppercase tracking-wider">${doc.fields.length} fields</span>
+                    </div>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-white border-b border-border text-left">
+                                <th class="px-4 py-2 text-[10px] uppercase font-bold tracking-widest text-text-secondary">Field</th>
+                                <th class="px-4 py-2 text-[10px] uppercase font-bold tracking-widest text-text-secondary">Value</th>
+                                <th class="px-4 py-2 text-[10px] uppercase font-bold tracking-widest text-text-secondary text-right">Conf</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-border">
+                            ${doc.fields.map((f) => renderFieldRow(di, doc.doc_id, f)).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `).join("");
+
+            root.querySelectorAll(".field-row").forEach((tr) => {
+                tr.addEventListener("click", (e) => {
+                    if (e.target.closest("input")) return;
+                    if (e.target.closest("[data-edit]")) return;
+                    const di = parseInt(tr.dataset.docIndex, 10);
+                    const fname = tr.dataset.fieldName;
+                    const f = CASE.documents[di].fields.find((x) => x.name === fname);
+                    if (f) highlightField(di, f, tr);
+                });
+            });
+            root.querySelectorAll("[data-edit]").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    const tr = btn.closest("tr");
+                    startEdit(tr);
+                });
+            });
+        }
+
+        function renderFieldRow(docIndex, docId, f) {
+            const b = band(f.confidence);
+            const conf = f.confidence != null ? `${Math.round(f.confidence * 100)}%` : "—";
+            const provenanceIcon = f.provenance === "human"
+                ? `<span class="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary text-white" title="Corrected by operator">human</span>`
+                : `<span class="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface text-text-secondary border border-border" title="Extracted by AI">AI</span>`;
+            const valueDisplay = f.value === null || f.value === "" ? `<span class="italic text-text-secondary/60">empty</span>` : escapeHtml(formatFieldValue(f));
+            return `
+                <tr class="field-row hover:bg-surface/40 transition-colors ${BAND_ROW[b]}" data-doc-index="${docIndex}" data-doc-id="${escapeHtml(docId)}" data-field-name="${escapeHtml(f.name)}">
+                    <td class="px-4 py-3 align-top">
+                        <div class="font-medium text-text-primary">${escapeHtml(humanizeFieldName(f.name))}</div>
+                        ${f.description ? `<div class="text-[10px] text-text-secondary/70 mt-0.5">${escapeHtml(f.description)}</div>` : ""}
+                    </td>
+                    <td class="px-4 py-3 align-top">
+                        <div class="flex items-center gap-2">
+                            <div data-value-cell class="flex-1 break-words">${valueDisplay}</div>
+                            ${provenanceIcon}
+                            <button data-edit class="text-text-secondary hover:text-primary" title="Edit value">
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-right align-top font-bold ${BAND_TEXT[b]}">${conf}</td>
+                </tr>`;
+        }
+
+        function formatFieldValue(f) {
+            if (f.value == null) return "";
+            if (f.field_type === "number" && !isNaN(Number(f.value))) {
+                return Number(f.value).toLocaleString("en-US");
+            }
+            return String(f.value);
+        }
+
+        // ---------- inline correction ----------
+        function startEdit(tr) {
+            const cell = tr.querySelector("[data-value-cell]");
+            const di = parseInt(tr.dataset.docIndex, 10);
+            const fname = tr.dataset.fieldName;
+            const f = CASE.documents[di].fields.find((x) => x.name === fname);
+            const original = f.value ?? "";
+
+            cell.innerHTML = `<input type="text" value="${escapeHtml(original)}" class="border border-warning rounded px-2 py-1 text-sm focus:ring-1 focus:ring-warning w-full font-medium">`;
+            const input = cell.querySelector("input");
+            input.focus();
+            input.select();
+
+            let done = false;
+            const commit = async (save) => {
+                if (done) return;
+                done = true;
+                const newVal = input.value;
+                if (!save || newVal === String(original)) {
+                    cell.innerHTML = (newVal === "" ? `<span class="italic text-text-secondary/60">empty</span>` : escapeHtml(formatFieldValue({ ...f, value: newVal })));
+                    return;
+                }
+                cell.innerHTML = `<span class="text-text-secondary text-xs italic">saving…</span>`;
+                try {
+                    const res = await fetch(`/api/cases/${encodeURIComponent(CASE.case_id)}/correct`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ doc_id: tr.dataset.docId, field_name: fname, new_value: newVal, actor: ACTOR }),
+                    });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const updated = await res.json();
+                    // Patch local case
+                    Object.assign(f, updated);
+                    // Re-render the row in place
+                    const newRow = document.createElement("tbody");
+                    newRow.innerHTML = renderFieldRow(di, tr.dataset.docId, f);
+                    const replacement = newRow.firstElementChild;
+                    tr.parentNode.replaceChild(replacement, tr);
+                    // Re-bind handlers on the replacement
+                    replacement.addEventListener("click", (e) => {
+                        if (e.target.closest("input")) return;
+                        if (e.target.closest("[data-edit]")) return;
+                        highlightField(di, f, replacement);
+                    });
+                    replacement.querySelector("[data-edit]").addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        startEdit(replacement);
+                    });
+                    showToast(`${humanizeFieldName(fname)} updated`);
+                } catch (e) {
+                    showToast(`Save failed: ${e.message}`, true);
+                    cell.innerHTML = escapeHtml(formatFieldValue(f));
+                }
+            };
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") { e.preventDefault(); commit(true); }
+                else if (e.key === "Escape") { e.preventDefault(); commit(false); }
+            });
+            input.addEventListener("blur", () => commit(true));
+        }
+
+        // ---------- bbox highlight ----------
+        function highlightField(docIndex, field, rowEl) {
+            document.querySelectorAll(".field-row.active-highlight").forEach((r) => r.classList.remove("active-highlight"));
+            if (rowEl) rowEl.classList.add("active-highlight");
+
+            const draw = () => {
+                const doc = CASE.documents[docIndex];
+                const cache = PDF_CACHE[doc.doc_id];
+                if (!cache) return;
+                cache.pageWrappers.forEach((p) => p.overlay.innerHTML = "");
+
+                const bbox = field.bounding_box;
+                if (!bbox) return;
+                const targetPage = bbox.page || 1;
+                const pw = cache.pageWrappers.find((p) => p.pageNum === targetPage);
+                if (!pw) return;
+
+                const dim = (doc.page_dimensions || []).find((d) => d.page === targetPage);
+                if (!dim) return;
+                const sx = pw.viewport.width / dim.width;
+                const sy = pw.viewport.height / dim.height;
+
+                const div = document.createElement("div");
+                div.className = "bbox-highlight pulsing";
+                div.style.left = `${bbox.x * sx}px`;
+                div.style.top = `${bbox.y * sy}px`;
+                div.style.width = `${bbox.width * sx}px`;
+                div.style.height = `${bbox.height * sy}px`;
+                pw.overlay.appendChild(div);
+
+                pw.wrapper.scrollIntoView({ behavior: "smooth", block: "center" });
+            };
+
+            if (docIndex !== CURRENT_DOC_INDEX) {
+                activateDocTab(docIndex).then(draw);
+            } else {
+                draw();
+            }
+        }
+
+        // ---------- history ----------
+        function renderHistory() {
+            const list = document.getElementById("history-list");
+            list.innerHTML = (CASE.history || []).map((h) => `
+                <li class="ml-6">
+                    <span class="absolute -left-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold">●</span>
+                    <div class="text-xs font-mono text-text-secondary">${escapeHtml(formatDateTime(h.at))}</div>
+                    <div class="text-sm font-bold text-text-primary mt-0.5">${escapeHtml((h.event || "").replace(/_/g, " "))}</div>
+                    <div class="text-xs text-text-secondary mt-0.5">by ${escapeHtml(h.actor || "—")}</div>
+                    ${h.detail ? `<pre class="text-[11px] text-text-secondary bg-surface rounded p-2 mt-1 overflow-x-auto">${escapeHtml(JSON.stringify(h.detail, null, 2))}</pre>` : ""}
+                </li>
+            `).join("") || `<li class="ml-6 text-text-secondary text-sm">No history yet.</li>`;
+        }
+
+        // ---------- documents summary ----------
+        function renderDocumentsSummary() {
+            const root = document.getElementById("documents-summary");
+            root.innerHTML = (CASE.documents || []).map((d) => `
+                <div class="bg-white rounded-lg border border-border p-4 flex items-start gap-4">
+                    <svg class="w-8 h-8 text-text-secondary shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <div class="flex-1">
+                        <div class="font-bold text-text-primary">${escapeHtml(humanizeDocType(d.document_type))}</div>
+                        <div class="text-xs text-text-secondary mt-0.5 font-mono">${escapeHtml(d.schema_id || "—")}</div>
+                        <div class="text-xs text-text-secondary mt-1">${d.page_count || (d.page_dimensions || []).length || 1} page · ${d.fields.length} fields extracted</div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        // ---------- integration error banner ----------
+        function renderIntegrationError() {
+            const banner = document.getElementById("error-banner");
+            if (!CASE.integration_error) {
+                banner.classList.add("hidden");
+                return;
+            }
+            const ie = CASE.integration_error;
+            document.getElementById("error-banner-detail").textContent = `${ie.endpoint} returned ${ie.status_code}. Retry count: ${ie.retry_count}. Last response: ${(ie.response_body || "").slice(0, 160)}`;
+            banner.classList.remove("hidden");
+        }
+
+        // ---------- action bar ----------
+        function renderActionBar() {
+            const approve = document.getElementById("btn-approve");
+            const reject = document.getElementById("btn-reject");
+            const retry = document.getElementById("btn-retry");
+            const message = document.getElementById("action-bar-message");
+            const notes = document.getElementById("decision-notes");
+
+            // Default visibility
+            approve.classList.remove("hidden");
+            reject.classList.remove("hidden");
+            retry.classList.add("hidden");
+            message.classList.add("hidden");
+            notes.disabled = false;
+            [approve, reject, retry].forEach((b) => b.disabled = false);
+
+            const state = CASE.state;
+            if (state === "complete" || state === "rejected") {
+                approve.classList.add("hidden");
+                reject.classList.add("hidden");
+                retry.classList.add("hidden");
+                notes.disabled = true;
+                message.classList.remove("hidden");
+                message.textContent = state === "complete" ? "✓ Case complete — sent to ERP." : "✕ Case rejected.";
+            } else if (state === "integration_error") {
+                approve.classList.add("hidden");
+                retry.classList.remove("hidden");
+            } else {
+                // pending_review or pending_approval_L1
+                if (state === "pending_approval_L1") {
+                    approve.textContent = "APPROVE (MANAGER)";
+                } else {
+                    approve.textContent = "APPROVE";
+                }
+            }
+        }
+
+        document.getElementById("btn-approve").addEventListener("click", () => doAction("approve"));
+        document.getElementById("btn-retry").addEventListener("click", () => doAction("retry"));
+        document.getElementById("btn-reject").addEventListener("click", async () => {
+            const reason = prompt("Reason for rejection?");
+            if (reason == null) return;
+            await doAction("reject", { reason });
+        });
+
+        async function doAction(kind, extra = {}) {
+            const buttons = ["btn-approve", "btn-reject", "btn-retry"].map((id) => document.getElementById(id));
+            buttons.forEach((b) => b.disabled = true);
+            try {
+                const body = { actor: ACTOR, ...extra };
+                const res = await fetch(`/api/cases/${encodeURIComponent(CASE.case_id)}/${kind}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body),
+                });
+                if (!res.ok) {
+                    const errBody = await res.text();
+                    throw new Error(`HTTP ${res.status}: ${errBody.slice(0, 200)}`);
+                }
+                const data = await res.json();
+                showToast(actionToastMessage(kind, data));
+                // Reload the case to get fresh state + history + integration_error
+                await loadCase();
+            } catch (e) {
+                showToast(`Action failed: ${e.message}`, true);
+                buttons.forEach((b) => b.disabled = false);
+            }
+        }
+
+        function actionToastMessage(kind, data) {
+            if (kind === "reject") return "Case rejected";
+            if (data.state === "complete") return `Approved → ERP record ${data.integration_result?.erp_record_id || "created"}`;
+            if (data.state === "pending_approval_L1") return "Approved → awaiting manager";
+            if (data.state === "integration_error") return "ERP rejected the webhook — check the error panel";
+            return `State: ${data.state}`;
+        }
+
+        loadCase();
+    </script>
+
+</body>
+
+</html>

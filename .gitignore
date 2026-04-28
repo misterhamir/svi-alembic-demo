@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+*.env.local
+
+# Runtime data (never commit demo state)
+backend/data/
+backend/data/**
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Logs
+*.log
+
+# Fixtures: sample PDFs are committed; runtime extracts are not
+fixtures/extracted-cache/
+fixtures/seed-cases/*.tmp
+
+# Local convenience folder — PDFs duplicated from fixtures/seed-cases/
+# for easier file-picker access during live demos
+test-pdfs/
+
+# Playwright smoke test artifacts
+.playwright/

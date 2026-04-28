@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI Alembic - Workflow Canvas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://unpkg.com/drawflow@0.0.60/dist/drawflow.min.css" />
+    <script src="https://unpkg.com/drawflow@0.0.60/dist/drawflow.min.js"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #031634;
+            --color-primary-hover: #1A2B4A;
+            --color-primary-light: #f2f4f6;
+            --color-background: #f8f9fb;
+            --color-surface: #f2f4f6;
+            --color-text-primary: #031634;
+            --color-text-secondary: #44474e;
+            --color-border: #e1e2e4;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+        @layer base { body { @apply bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex; } }
+    </style>
+    <style>
+        .ms { font-family: 'Material Symbols Outlined', system-ui, sans-serif; font-size: 18px; line-height: 1; user-select: none; }
+
+        #drawflow {
+            width: 100%; height: 100%;
+            background-color: #F9FAFB;
+            background-image: radial-gradient(#D1D5DB 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+        /* Drawflow scales around the center by default — switch to top-left
+           so our translate/scale math lines up with screen coordinates. */
+        #drawflow > .drawflow {
+            transform-origin: 0 0 !important;
+        }
+        .drawflow .drawflow-node {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 0;
+            min-width: 220px;
+            box-shadow: 0 12px 28px rgba(15,23,42,0.08);
+            cursor: pointer;
+        }
+        .drawflow .drawflow-node.selected {
+            border-color: #94A3B8;
+            box-shadow: 0 12px 28px rgba(15,23,42,0.16);
+        }
+        .drawflow .drawflow-node .input,
+        .drawflow .drawflow-node .output {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: white; border: 1px solid #D1D5DB;
+            top: 50%; margin-top: -6px;
+        }
+        .drawflow .drawflow-node .input  { left: -6px; }
+        .drawflow .drawflow-node .output { right: -6px; }
+        .drawflow .drawflow-node.intake .output      { background: #6B7280; border-color: white; }
+        .drawflow .drawflow-node.classify .output,
+        .drawflow .drawflow-node.extract .output,
+        .drawflow .drawflow-node.validate .output    { background: #8B5CF6; border-color: white; }
+        .drawflow .drawflow-node.review .output,
+        .drawflow .drawflow-node.approval .output    { background: #F97316; border-color: white; }
+        .drawflow .drawflow-node.webhook .output     { background: #10B981; border-color: white; }
+        .drawflow .connection .main-path { stroke: #94A3B8; stroke-width: 2px; }
+        .drawflow .connection .main-path:hover { stroke: #475569; stroke-width: 3px; }
+    </style>
+</head>
+
+<body class="bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <div class="flex h-full w-64 flex-col border-r border-border bg-background shrink-0">
+        <div class="flex h-16 shrink-0 items-center px-6 border-b border-border">
+            <img src="SVI_logo/alembic-for-light-bg.png" alt="SVI Alembic logo" class="h-8 w-auto object-contain" />
+        </div>
+        <div class="flex flex-1 flex-col overflow-y-auto px-3 py-6">
+            <nav class="flex-1 space-y-1">
+                <a href="operator-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+                    My Queue
+                </a>
+                <a href="approvals-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Approvals
+                </a>
+                <a href="dashboard.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    Dashboard
+                </a>
+                <a href="canvas-editor.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors bg-primary-light text-primary border-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>
+                    Workflow
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+
+        <!-- Header -->
+        <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-8">
+            <div class="flex items-center gap-3 min-w-0">
+                <h1 class="text-lg font-bold uppercase tracking-wide text-text-primary">WORKFLOW CANVAS</h1>
+                <span class="text-xs text-text-secondary font-medium bg-surface border border-border rounded px-2 py-0.5" id="workflow-name">…</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-amber-50 text-amber-700 border-amber-200">
+                    🔒 View only
+                </span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-text-secondary">
+                <span class="font-mono" id="workflow-id">—</span>
+                <span class="h-4 w-px bg-border"></span>
+                <span id="workflow-version">v—</span>
+                <span class="h-4 w-px bg-border"></span>
+                <span class="text-text-secondary/70">SVI deployment configures workflows per tenant. Drag-drop authoring is a Phase 2 capability.</span>
+            </div>
+        </header>
+
+        <!-- Canvas + Side Panel -->
+        <div class="flex-1 flex relative overflow-hidden">
+            <div id="drawflow" class="flex-1"></div>
+
+            <!-- Zoom controls -->
+            <div class="absolute bottom-6 left-6 flex gap-2 z-10">
+                <button id="zoom-in" class="bg-white border border-border rounded h-9 w-9 flex items-center justify-center hover:bg-surface text-text-secondary"><span class="ms">add</span></button>
+                <button id="zoom-out" class="bg-white border border-border rounded h-9 w-9 flex items-center justify-center hover:bg-surface text-text-secondary"><span class="ms">remove</span></button>
+                <button id="zoom-reset" class="bg-white border border-border rounded h-9 px-3 flex items-center justify-center hover:bg-surface text-text-secondary text-xs font-mono">FIT</button>
+            </div>
+
+            <!-- Properties Panel (read-only) -->
+            <aside id="props-panel" class="absolute right-0 top-0 bottom-0 w-[380px] bg-white border-l border-border shadow-xl translate-x-full transition-transform overflow-hidden flex flex-col z-20">
+                <div class="flex items-center justify-between p-4 border-b border-border">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div id="props-icon-box" class="w-9 h-9 rounded-md flex items-center justify-center border bg-surface border-border">
+                            <span id="props-icon" class="ms text-text-secondary">circle</span>
+                        </div>
+                        <div class="min-w-0">
+                            <div id="props-category" class="text-[10px] font-mono uppercase tracking-widest text-text-secondary truncate">—</div>
+                            <div id="props-name" class="font-bold text-text-primary truncate">—</div>
+                        </div>
+                    </div>
+                    <button id="props-close" class="p-1 rounded hover:bg-surface text-text-secondary">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                </div>
+                <div id="props-body" class="flex-1 overflow-y-auto p-4 space-y-4 text-sm"></div>
+                <div class="p-4 border-t border-border bg-surface/40 text-[11px] text-text-secondary">
+                    Read-only. Editing is unlocked once the deployment is signed off by SVI.
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        // ---------- Node visual config ----------
+        const NODE_THEME = {
+            intake:      { color: "#6B7280", icon: "upload_file",   category: "ENTRY" },
+            classify:    { color: "#8B5CF6", icon: "label",         category: "INTELLIGENCE" },
+            extract:     { color: "#8B5CF6", icon: "auto_awesome",  category: "INTELLIGENCE" },
+            validate:    { color: "#8B5CF6", icon: "verified",      category: "INTELLIGENCE" },
+            review:      { color: "#F97316", icon: "rate_review",   category: "HUMAN" },
+            approval:    { color: "#F97316", icon: "how_to_reg",    category: "HUMAN" },
+            webhook:     { color: "#10B981", icon: "webhook",       category: "EXTERNAL" },
+            end_success: { color: "#475569", icon: "check_circle",  category: "TERMINAL" },
+        };
+
+        const NODE_META = {
+            intake:      (cfg) => `Sources: ${(cfg.sources || []).join(", ") || "—"}`,
+            classify:    (cfg) => `${(cfg.expected_schemas || []).length} schemas`,
+            extract:     (cfg) => `${Object.keys(cfg.schema_pinning || {}).length} pinned schemas`,
+            validate:    (cfg) => `${(cfg.rules || []).length} rule${(cfg.rules || []).length === 1 ? "" : "s"} · ${cfg.match_mode || "ALL"}`,
+            review:      (cfg) => `Group: ${cfg.responsible?.value || "—"}`,
+            approval:    (cfg) => `${(cfg.levels || []).length} level · ${cfg.levels?.[0]?.responsible?.value || "—"}`,
+            webhook:     (cfg) => `POST → ${(cfg.url?.production || "").replace(/^https?:\/\//, "").slice(0, 32)}`,
+            end_success: () => "Status: Closed",
+        };
+
+        function buildNodeHTML(node) {
+            const theme = NODE_THEME[node.type] || NODE_THEME.intake;
+            const meta = (NODE_META[node.type] || (() => ""))(node.config || {});
+            return `
+                <div style="display:flex;flex-direction:column;font-family:Inter,system-ui,sans-serif;">
+                    <div style="height:26px;display:flex;align-items:center;padding:0 10px;background:${theme.color};border-radius:7px 7px 0 0;">
+                        <span style="font-weight:700;font-size:10px;line-height:12px;letter-spacing:0.06em;text-transform:uppercase;color:white;flex:1;">${escapeHtml(node.type)}</span>
+                        <span class="ms" style="font-size:14px;color:white;">${theme.icon}</span>
+                    </div>
+                    <div style="padding:12px 14px;">
+                        <div style="font-weight:600;font-size:14px;line-height:18px;color:#0F172A;">${escapeHtml(node.label || node.type)}</div>
+                        <div style="font-size:11px;line-height:14px;color:#64748B;margin-top:3px;font-family:'Inter',system-ui,sans-serif;">${escapeHtml(meta)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+        // ---------- Drawflow setup ----------
+        const container = document.getElementById("drawflow");
+        const editor = new Drawflow(container);
+        editor.start();
+        // We keep editor_mode in "edit" so click events bubble to nodeSelected.
+        // To prevent users from actually editing, we revert any node movement
+        // and ignore connection changes — see nodeMoved listener below.
+
+        let WORKFLOW = null;
+        let NODE_BY_WF_ID = {}; // wf node id (n1) -> drawflow id
+        let NODE_HOME = {};     // drawflow id -> {x, y} (snap-back targets)
+
+        async function loadWorkflow() {
+            try {
+                const r = await fetch("/api/workflows/ap_invoice_faktur_pajak_v1");
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                WORKFLOW = await r.json();
+            } catch (e) {
+                document.getElementById("workflow-name").textContent = "Failed to load workflow";
+                console.error(e);
+                return;
+            }
+
+            document.getElementById("workflow-name").textContent = WORKFLOW.name;
+            document.getElementById("workflow-id").textContent = WORKFLOW.id;
+            document.getElementById("workflow-version").textContent = `v${WORKFLOW.version} · ${WORKFLOW.status}`;
+
+            renderNodes();
+        }
+
+        function renderNodes() {
+            const NODE_W = 220;
+            const NODE_H = 80;
+            const GAP_X = 90;
+            const startX = 60;
+            const y = 200;
+
+            WORKFLOW.nodes.forEach((node, i) => {
+                const x = startX + i * (NODE_W + GAP_X);
+                const isFirst = i === 0;
+                const isLast = node.type === "end_success";
+                const inputs = isFirst ? 0 : 1;
+                const outputs = isLast ? 0 : 1;
+                const drawflowId = editor.addNode(
+                    node.type,
+                    inputs, outputs,
+                    x, y,
+                    node.type, // class on the node element
+                    { wfNodeId: node.id, type: node.type, label: node.label, config: node.config },
+                    buildNodeHTML(node),
+                );
+                NODE_BY_WF_ID[node.id] = drawflowId;
+                NODE_HOME[drawflowId] = { x, y };
+            });
+
+            WORKFLOW.edges.forEach((e) => {
+                const src = NODE_BY_WF_ID[e.from];
+                const dst = NODE_BY_WF_ID[e.to];
+                if (src != null && dst != null) {
+                    editor.addConnection(src, dst, "output_1", "input_1");
+                }
+            });
+
+            // Auto-fit zoom + pan so the whole flow is visible
+            setTimeout(fitToView, 50);
+        }
+
+        function fitToView() {
+            const NODE_W = 220, GAP_X = 90, NODE_H = 80;
+            const totalWidth = WORKFLOW.nodes.length * (NODE_W + GAP_X) - GAP_X;
+            const containerWidth = container.clientWidth;
+            const containerHeight = container.clientHeight;
+            const targetZoom = Math.min(0.85, Math.max(0.35, (containerWidth - 80) / totalWidth));
+
+            // Drawflow transform = translate(canvas_x, canvas_y) scale(zoom)
+            // Node at canvas (x,y) lands at screen (x*z + cx, y*z + cy).
+            // Place leftmost node at screen x=40, vertically center at canvas y=240.
+            editor.zoom = targetZoom;
+            editor.zoom_last_value = targetZoom;
+            editor.canvas_x = 40 - 60 * targetZoom;
+            editor.canvas_y = (containerHeight / 2) - (200 + NODE_H / 2) * targetZoom;
+
+            // Apply transform directly — Drawflow's zoom_refresh recomputes canvas_x/y
+            // relative to last value, which fights the explicit values we just set.
+            editor.precanvas.style.transform =
+                `translate(${editor.canvas_x}px, ${editor.canvas_y}px) scale(${targetZoom})`;
+        }
+
+        // ---------- Properties panel (view-only) ----------
+        function openPanel(drawflowId) {
+            const node = editor.getNodeFromId(drawflowId);
+            if (!node) return;
+            const data = node.data;
+            const theme = NODE_THEME[data.type] || NODE_THEME.intake;
+            document.getElementById("props-icon").textContent = theme.icon;
+            document.getElementById("props-icon-box").style.background = `${theme.color}1F`;
+            document.getElementById("props-icon-box").style.borderColor = `${theme.color}55`;
+            document.getElementById("props-icon").style.color = theme.color;
+            document.getElementById("props-category").textContent = `${theme.category} · ${data.type}`;
+            document.getElementById("props-name").textContent = data.label || data.type;
+            document.getElementById("props-body").innerHTML = renderConfig(data.type, data.config || {});
+            document.getElementById("props-panel").classList.remove("translate-x-full");
+        }
+
+        // Use a DOM-level delegated click on the canvas — Drawflow's nodeSelected
+        // event sometimes doesn't fire if a drag was registered first.
+        container.addEventListener("click", (e) => {
+            const nodeEl = e.target.closest(".drawflow-node");
+            if (!nodeEl) return;
+            const id = nodeEl.id.replace(/^node-/, "");
+            openPanel(id);
+        });
+
+        // Snap any moved node back to its registered home position. Drawflow
+        // 'fixed' mode disables clicks; 'edit' mode allows drag, so we revert.
+        editor.on("nodeMoved", (drawflowId) => {
+            const home = NODE_HOME[drawflowId];
+            if (!home) return;
+            const node = editor.getNodeFromId(drawflowId);
+            if (!node) return;
+            if (node.pos_x === home.x && node.pos_y === home.y) return;
+            // Update the underlying data + DOM transform.
+            node.pos_x = home.x;
+            node.pos_y = home.y;
+            const el = document.getElementById(`node-${drawflowId}`);
+            if (el) {
+                el.style.left = `${home.x}px`;
+                el.style.top = `${home.y}px`;
+            }
+            editor.updateConnectionNodes(`node-${drawflowId}`);
+        });
+
+        document.getElementById("props-close").addEventListener("click", () => {
+            document.getElementById("props-panel").classList.add("translate-x-full");
+        });
+
+        function renderConfig(type, cfg) {
+            const sections = [];
+            const kv = (label, val) => `
+                <div>
+                    <div class="text-[10px] font-mono uppercase tracking-widest text-text-secondary mb-1">${escapeHtml(label)}</div>
+                    <div class="text-text-primary">${val}</div>
+                </div>`;
+
+            if (type === "intake") {
+                sections.push(kv("Sources", (cfg.sources || []).map((s) => `<span class="inline-block px-2 py-0.5 mr-1 mb-1 rounded text-xs bg-surface border border-border">${escapeHtml(s)}</span>`).join("") || "—"));
+                sections.push(`<div class="text-xs text-text-secondary leading-relaxed">Each upload kicks off the workflow. Operators can drop a PDF from the queue page.</div>`);
+            } else if (type === "classify") {
+                sections.push(kv("Expected document schemas", (cfg.expected_schemas || []).map((s) => `<div class="font-mono text-xs bg-surface border border-border rounded px-2 py-1 mb-1">${escapeHtml(s)}</div>`).join("") || "—"));
+                sections.push(`<div class="text-xs text-text-secondary leading-relaxed">Splits the bundle into recognised document types so the right schema runs on each.</div>`);
+            } else if (type === "extract") {
+                const pinning = cfg.schema_pinning || {};
+                const rows = Object.entries(pinning).map(([dt, sid]) => `
+                    <div class="flex items-center justify-between bg-surface border border-border rounded px-3 py-2 mb-1 text-xs">
+                        <span class="font-mono text-text-secondary">${escapeHtml(dt)}</span>
+                        <span class="text-text-secondary">→</span>
+                        <span class="font-mono text-text-primary">${escapeHtml(sid)}</span>
+                    </div>`).join("");
+                sections.push(kv("Schema pinning", rows || "—"));
+                sections.push(`<div class="text-xs text-text-secondary leading-relaxed">Calls the extraction service once per document. Returns fields with bounding boxes and confidence.</div>`);
+            } else if (type === "validate") {
+                const rules = (cfg.rules || []).map((r) => `
+                    <div class="bg-surface border border-border rounded p-3 mb-2 text-xs">
+                        <div class="font-mono text-text-primary">${escapeHtml(r.operand_a)} ${escapeHtml(r.comparator)} ${escapeHtml(r.operand_b)}</div>
+                        <div class="text-text-secondary mt-1">on fail: <span class="font-mono">${escapeHtml(r.fail_action || "warn")}</span></div>
+                    </div>`).join("");
+                sections.push(kv("Rules", rules || "—"));
+                sections.push(kv("Match mode", `<span class="font-mono text-xs">${escapeHtml(cfg.match_mode || "ALL")}</span>`));
+            } else if (type === "review") {
+                sections.push(kv("Responsible", `<span class="font-mono text-xs bg-surface border border-border rounded px-2 py-1">${escapeHtml(cfg.responsible?.type || "")}: ${escapeHtml(cfg.responsible?.value || "—")}</span>`));
+                sections.push(`<div class="text-xs text-text-secondary leading-relaxed">Operator opens the case from My Queue, corrects fields where needed, then approves. Same idea as a "Wait for Approval" node in n8n.</div>`);
+            } else if (type === "approval") {
+                const levels = (cfg.levels || []).map((l, i) => `
+                    <div class="bg-surface border border-border rounded p-3 mb-1 text-xs">
+                        <div class="font-bold text-text-primary">L${i + 1} — ${escapeHtml(l.label)}</div>
+                        <div class="text-text-secondary mt-0.5">${escapeHtml(l.responsible?.type || "")}: ${escapeHtml(l.responsible?.value || "—")}</div>
+                    </div>`).join("");
+                sections.push(kv("Approval levels", levels || "—"));
+            } else if (type === "webhook") {
+                sections.push(kv("URL (production)", `<span class="font-mono text-xs break-all">${escapeHtml(cfg.url?.production || "—")}</span>`));
+                sections.push(kv("Auth", `<span class="font-mono text-xs">${escapeHtml(cfg.auth?.method || "—")} via header <code>${escapeHtml(cfg.auth?.header || "")}</code></span>`));
+                const map = cfg.payload_mapping || {};
+                const rows = Object.entries(map).map(([k, v]) => `
+                    <div class="flex items-center gap-2 bg-surface border border-border rounded px-2 py-1 mb-1 text-[11px]">
+                        <span class="font-mono text-text-secondary">${escapeHtml(k)}</span>
+                        <span class="text-text-secondary">←</span>
+                        <span class="font-mono text-text-primary">${escapeHtml(v)}</span>
+                    </div>`).join("");
+                sections.push(kv("Payload mapping", rows || "—"));
+                sections.push(kv("Idempotency header", `<span class="font-mono text-xs">${escapeHtml(cfg.idempotency_key_header || "—")}</span>`));
+            } else if (type === "end_success") {
+                sections.push(`<div class="text-xs text-text-secondary leading-relaxed">Terminal node. Case is marked complete and the operator queue removes it from the active list.</div>`);
+            }
+            return sections.join("");
+        }
+
+        // ---------- Zoom controls ----------
+        document.getElementById("zoom-in").addEventListener("click", () => editor.zoom_in());
+        document.getElementById("zoom-out").addEventListener("click", () => editor.zoom_out());
+        document.getElementById("zoom-reset").addEventListener("click", fitToView);
+
+        loadWorkflow();
+    </script>
+
+</body>
+</html>

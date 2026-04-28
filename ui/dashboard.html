@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI Alembic - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #031634;
+            --color-primary-hover: #1A2B4A;
+            --color-primary-light: #f2f4f6;
+            --color-background: #f8f9fb;
+            --color-surface: #f2f4f6;
+            --color-text-primary: #031634;
+            --color-text-secondary: #44474e;
+            --color-border: #e1e2e4;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+        @layer base { body { @apply bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex; } }
+    </style>
+</head>
+
+<body class="bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <div class="flex h-full w-64 flex-col border-r border-border bg-background shrink-0">
+        <div class="flex h-16 shrink-0 items-center px-6 border-b border-border">
+            <img src="SVI_logo/alembic-for-light-bg.png" alt="SVI Alembic logo" class="h-8 w-auto object-contain" />
+        </div>
+        <div class="flex flex-1 flex-col overflow-y-auto px-3 py-6">
+            <nav class="flex-1 space-y-1">
+                <a href="operator-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+                    My Queue
+                </a>
+                <a href="approvals-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Approvals
+                </a>
+                <a href="dashboard.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors bg-primary-light text-primary border-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    Dashboard
+                </a>
+                <a href="canvas-editor.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>
+                    Workflow
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto">
+        <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-8">
+            <h1 class="text-lg font-bold uppercase tracking-wide text-text-primary">DASHBOARD</h1>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-text-secondary">Auto-refresh every 5s</span>
+                <button id="refresh-btn" class="text-sm bg-primary text-white px-3 py-1.5 rounded font-medium hover:bg-primary-hover">Refresh now</button>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-7xl w-full mx-auto space-y-8">
+
+            <!-- KPI tiles -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Total Cases</div>
+                    <div class="mt-2 text-3xl font-bold text-text-primary" id="kpi-total">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">all-time</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Pending Review</div>
+                    <div class="mt-2 text-3xl font-bold text-orange-700" id="kpi-pending-review">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">in operator queue</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Awaiting Approval</div>
+                    <div class="mt-2 text-3xl font-bold text-amber-700" id="kpi-pending-approval">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">manager queue</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">ERP Errors</div>
+                    <div class="mt-2 text-3xl font-bold text-red-700" id="kpi-errors">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">need retry</div>
+                </div>
+            </section>
+
+            <!-- Throughput strip -->
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Completed (sent to ERP)</div>
+                    <div class="mt-2 text-3xl font-bold text-emerald-700" id="kpi-complete">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">terminal — ERP record created</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Rejected</div>
+                    <div class="mt-2 text-3xl font-bold text-text-secondary" id="kpi-rejected">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">terminal — operator rejected</div>
+                </div>
+            </section>
+
+            <!-- Recent activity -->
+            <section>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary">Recent activity</h2>
+                    <a href="operator-queue.html" class="text-xs text-primary hover:underline">View all in queue →</a>
+                </div>
+                <div class="bg-white rounded-lg border border-border shadow-sm overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-surface border-b border-border text-left">
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Case ID</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Subject</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">State</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-rows" class="divide-y divide-border">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-text-secondary text-sm">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ERP audit -->
+            <section>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary">Mock ERP — current behavior</h2>
+                </div>
+                <div class="bg-white rounded-lg border border-border shadow-sm p-5 flex items-center gap-4 flex-wrap">
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Endpoint</div>
+                        <div class="font-mono text-sm text-text-primary">POST /api/mock-erp/invoices</div>
+                    </div>
+                    <div class="h-10 w-px bg-border"></div>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Mode</div>
+                        <div id="erp-mode" class="font-bold">—</div>
+                    </div>
+                    <div class="flex-1"></div>
+                    <button id="toggle-erp" class="text-sm bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded font-medium">Toggle 201 ⇄ 503</button>
+                </div>
+                <div class="text-xs text-text-secondary mt-2">Demo control: flip the mock ERP to fail mode to walk the integration-error → retry story.</div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const STATES = ["pending_review", "pending_approval_L1", "integration_error", "complete", "rejected"];
+
+        async function fetchCount(state) {
+            const r = await fetch(`/api/cases?state=${encodeURIComponent(state)}&limit=1`);
+            if (!r.ok) return 0;
+            const d = await r.json();
+            return d.total ?? 0;
+        }
+
+        async function loadDashboard() {
+            const counts = {};
+            await Promise.all(STATES.map(async (s) => { counts[s] = await fetchCount(s); }));
+            const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+            document.getElementById("kpi-total").textContent = total;
+            document.getElementById("kpi-pending-review").textContent = counts.pending_review;
+            document.getElementById("kpi-pending-approval").textContent = counts.pending_approval_L1;
+            document.getElementById("kpi-errors").textContent = counts.integration_error;
+            document.getElementById("kpi-complete").textContent = counts.complete;
+            document.getElementById("kpi-rejected").textContent = counts.rejected;
+
+            await loadRecent();
+            await loadErpStatus();
+        }
+
+        async function loadRecent() {
+            const r = await fetch("/api/cases?limit=8");
+            const tbody = document.getElementById("recent-rows");
+            if (!r.ok) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-error text-sm">Failed to load</td></tr>`;
+                return;
+            }
+            const d = await r.json();
+            const cases = d.cases || [];
+            if (cases.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-text-secondary text-sm">No cases yet. Upload one from My Queue.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = cases.map((c) => `
+                <tr class="hover:bg-surface/40 cursor-pointer" onclick="location.href='case-detail.html?id=${encodeURIComponent(c.case_id)}'">
+                    <td class="px-4 py-2 font-mono text-xs text-text-secondary">${escapeHtml(c.case_id.replace(/^case_/, "").slice(0, 8).toUpperCase())}</td>
+                    <td class="px-4 py-2 text-text-primary truncate max-w-md">${escapeHtml(c.subject || "(untitled)")}</td>
+                    <td class="px-4 py-2 text-text-secondary text-xs font-mono">${escapeHtml(c.state)}</td>
+                    <td class="px-4 py-2 text-text-secondary text-xs">${escapeHtml(formatDate(c.created_at))}</td>
+                </tr>`).join("");
+        }
+
+        async function loadErpStatus() {
+            try {
+                const r = await fetch("/api/mock-erp/status");
+                const d = await r.json();
+                const el = document.getElementById("erp-mode");
+                if (d.mode === "503") {
+                    el.textContent = "503 — failing";
+                    el.className = "font-bold text-red-700";
+                } else {
+                    el.textContent = "201 — accepting";
+                    el.className = "font-bold text-emerald-700";
+                }
+            } catch (e) {
+                document.getElementById("erp-mode").textContent = "—";
+            }
+        }
+
+        document.getElementById("toggle-erp").addEventListener("click", async () => {
+            const cur = await (await fetch("/api/mock-erp/status")).json();
+            const next = cur.mode === "201" ? "503" : "201";
+            await fetch("/api/mock-erp/toggle", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ mode: next }),
+            });
+            await loadErpStatus();
+        });
+
+        document.getElementById("refresh-btn").addEventListener("click", loadDashboard);
+
+        const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        const formatDate = (iso) => {
+            if (!iso) return "—";
+            const d = new Date(iso);
+            return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+        };
+
+        loadDashboard();
+        setInterval(loadDashboard, 5000);
+    </script>
+
+</body>
+</html>

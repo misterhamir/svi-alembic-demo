@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI Alembic - Approvals</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #031634;
+            --color-primary-hover: #1A2B4A;
+            --color-primary-light: #f2f4f6;
+            --color-background: #f8f9fb;
+            --color-surface: #f2f4f6;
+            --color-text-primary: #031634;
+            --color-text-secondary: #44474e;
+            --color-border: #e1e2e4;
+            --color-success: #415e92;
+            --color-warning: #4e5e80;
+            --color-error: #ba1a1a;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --radius-DEFAULT: 8px;
+        }
+        @layer base { body { @apply bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex; } }
+    </style>
+</head>
+
+<body class="bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <div class="flex h-full w-64 flex-col border-r border-border bg-background shrink-0">
+        <div class="flex h-16 shrink-0 items-center px-6 border-b border-border">
+            <img src="SVI_logo/alembic-for-light-bg.png" alt="SVI Alembic logo" class="h-8 w-auto object-contain" />
+        </div>
+        <div class="flex flex-1 flex-col overflow-y-auto px-3 py-6">
+            <nav class="flex-1 space-y-1">
+                <a href="operator-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+                    My Queue
+                </a>
+                <a href="approvals-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors bg-primary-light text-primary border-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Approvals
+                </a>
+                <a href="dashboard.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    Dashboard
+                </a>
+                <a href="canvas-editor.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>
+                    Workflow
+                </a>
+            </nav>
+        </div>
+        <div class="border-t border-border p-4">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-full bg-surface border border-border flex items-center justify-center text-sm font-medium text-text-primary">MM</div>
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium text-text-primary">Maria Manager</span>
+                    <span class="text-xs text-text-secondary">AP Manager</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-[#f9fafb]">
+        <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-8">
+            <div class="flex items-center gap-3">
+                <h1 class="text-lg font-bold uppercase tracking-wide text-text-primary drop-shadow-sm">APPROVALS</h1>
+                <span class="text-xs text-text-secondary font-medium bg-surface border border-border rounded px-2 py-0.5">Cases awaiting your sign-off</span>
+            </div>
+            <a href="operator-queue.html" class="text-sm text-text-secondary hover:text-primary font-medium">← Back to operator queue</a>
+        </header>
+
+        <div class="flex-1 p-8 overflow-y-auto">
+            <div class="max-w-7xl mx-auto space-y-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-text-secondary font-medium text-xs uppercase tracking-wider">Show:</span>
+                        <select id="state-filter" class="border border-border bg-white rounded px-3 py-1.5 hover:bg-surface text-sm cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary">
+                            <option value="pending_approval_L1" selected>Awaiting My Approval</option>
+                            <option value="integration_error">Integration Errors</option>
+                            <option value="">All approval-relevant</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg border border-border shadow-sm overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-border bg-surface text-left">
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Case ID</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Title</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Status</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Submitted by clerk</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="queue-rows" class="divide-y divide-border">
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-text-secondary text-sm">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="flex items-center justify-between px-4 py-3 border-t border-border bg-surface/40">
+                        <span id="queue-count" class="text-xs text-text-secondary">&nbsp;</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STATE_LABEL = {
+            pending_review: { status: "Pending Review", pill: "orange", action: "REVIEW" },
+            pending_approval_L1: { status: "Awaiting Approval", pill: "amber", action: "REVIEW & APPROVE" },
+            integration_error: { status: "ERP Error", pill: "red", action: "RETRY" },
+            complete: { status: "Complete", pill: "emerald", action: "VIEW" },
+            rejected: { status: "Rejected", pill: "gray", action: "VIEW" },
+        };
+        const PILL_CLASS = {
+            orange: "bg-orange-50 text-orange-700 border-orange-200",
+            amber: "bg-amber-50 text-amber-700 border-amber-200",
+            red: "bg-red-50 text-red-700 border-red-200",
+            emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            gray: "bg-gray-50 text-gray-600 border-gray-200",
+        };
+        const DOT_CLASS = {
+            orange: "bg-orange-500", amber: "bg-amber-500", red: "bg-red-500", emerald: "bg-emerald-500", gray: "bg-gray-400",
+        };
+
+        const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        const shortId = (id) => id ? id.replace(/^case_/, "").slice(0, 8).toUpperCase() : "";
+        const formatDate = (iso) => {
+            if (!iso) return "";
+            const d = new Date(iso);
+            return d.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+        };
+
+        function renderRow(c) {
+            const meta = STATE_LABEL[c.state] || { status: c.state, pill: "gray", action: "OPEN" };
+            const subject = escapeHtml(c.subject || "(untitled)");
+            const conf = c.overall_confidence != null ? `${Math.round(c.overall_confidence * 100)}% AI confidence` : "";
+            return `
+                <tr class="hover:bg-surface/50 transition-colors cursor-pointer" data-case-id="${escapeHtml(c.case_id)}">
+                    <td class="px-4 py-3 font-mono text-xs text-text-secondary">${escapeHtml(shortId(c.case_id))}</td>
+                    <td class="px-4 py-3">
+                        <div class="font-bold text-text-primary">${subject}</div>
+                        <div class="text-xs text-text-secondary">${escapeHtml(conf)}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border ${PILL_CLASS[meta.pill]}">
+                            <span class="w-1.5 h-1.5 rounded-full inline-block ${DOT_CLASS[meta.pill]}"></span>
+                            ${escapeHtml(meta.status)}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-text-secondary text-xs">${escapeHtml(formatDate(c.created_at))}</td>
+                    <td class="px-4 py-3 text-right">
+                        <a href="case-detail.html?id=${encodeURIComponent(c.case_id)}" class="bg-primary/10 hover:bg-primary/20 text-primary px-4 py-1.5 rounded font-bold text-xs transition-colors">${escapeHtml(meta.action)}</a>
+                    </td>
+                </tr>`;
+        }
+
+        async function loadQueue() {
+            const tbody = document.getElementById("queue-rows");
+            const countEl = document.getElementById("queue-count");
+            const state = document.getElementById("state-filter").value;
+            tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-text-secondary text-sm">Loading…</td></tr>`;
+            try {
+                let cases = [];
+                let total = 0;
+                if (state) {
+                    const res = await fetch(`/api/cases?state=${encodeURIComponent(state)}`);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const data = await res.json();
+                    cases = data.cases;
+                    total = data.total;
+                } else {
+                    // Combined view: pending_approval_L1 + integration_error
+                    const [a, b] = await Promise.all([
+                        fetch("/api/cases?state=pending_approval_L1").then(r => r.json()),
+                        fetch("/api/cases?state=integration_error").then(r => r.json()),
+                    ]);
+                    cases = [...a.cases, ...b.cases];
+                    total = a.total + b.total;
+                }
+                if (cases.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-12 text-center text-text-secondary text-sm">No cases awaiting your action. ✓</td></tr>`;
+                    countEl.textContent = "Showing 0 of 0";
+                    return;
+                }
+                tbody.innerHTML = cases.map(renderRow).join("");
+                countEl.textContent = `Showing ${cases.length} of ${total}`;
+                tbody.querySelectorAll("tr[data-case-id]").forEach((tr) => {
+                    tr.addEventListener("click", (e) => {
+                        if (e.target.closest("a")) return;
+                        location.href = `case-detail.html?id=${encodeURIComponent(tr.dataset.caseId)}`;
+                    });
+                });
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-8 text-center text-error text-sm">Failed to load: ${escapeHtml(err.message)}</td></tr>`;
+                countEl.textContent = "";
+            }
+        }
+
+        document.getElementById("state-filter").addEventListener("change", loadQueue);
+        loadQueue();
+    </script>
+
+</body>
+</html>
