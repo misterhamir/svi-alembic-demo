@@ -64,6 +64,16 @@
                     <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>
                     Workflow
                 </a>
+                <a href="metrics.html"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                    Metrics
+                </a>
+                <a href="flywheel.html"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Flywheel
+                </a>
             </nav>
         </div>
 
@@ -237,9 +247,26 @@
                     </td>
                     <td class="px-4 py-3 text-text-secondary text-xs">${escapeHtml(formatDate(c.created_at))}</td>
                     <td class="px-4 py-3 text-right">
-                        <a href="case-detail.html?id=${encodeURIComponent(c.case_id)}" class="bg-primary/10 hover:bg-primary/20 text-primary px-4 py-1.5 rounded font-bold text-xs transition-colors">${escapeHtml(meta.action)}</a>
+                        <div class="flex items-center gap-2 justify-end">
+                            <a href="case-detail.html?id=${encodeURIComponent(c.case_id)}" class="bg-primary/10 hover:bg-primary/20 text-primary px-4 py-1.5 rounded font-bold text-xs transition-colors">${escapeHtml(meta.action)}</a>
+                            <button data-reset-id="${escapeHtml(c.case_id)}" class="text-text-secondary hover:text-error border border-border hover:border-error/40 px-2 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition-colors" title="Reset case for demo">↺</button>
+                        </div>
                     </td>
                 </tr>`;
+        }
+
+        async function resetCase(caseId) {
+            if (!confirm(`Reset case ${caseId.slice(-8).toUpperCase()} back to Pending Review?\n\nThis will also clear all verdicts and actions from your browser.`)) return;
+            try {
+                const r = await fetch(`/api/cases/${encodeURIComponent(caseId)}/reset`, { method: "POST" });
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                // Clear localStorage state for this case
+                localStorage.removeItem(`svi_verdicts_${caseId}`);
+                localStorage.removeItem(`svi_actions_${caseId}`);
+                await loadQueue();
+            } catch (e) {
+                alert(`Reset failed: ${e.message}`);
+            }
         }
 
         async function loadQueue() {
@@ -264,7 +291,14 @@
                 tbody.querySelectorAll("tr[data-case-id]").forEach((tr) => {
                     tr.addEventListener("click", (e) => {
                         if (e.target.closest("a")) return;
+                        if (e.target.closest("[data-reset-id]")) return;
                         location.href = `case-detail.html?id=${encodeURIComponent(tr.dataset.caseId)}`;
+                    });
+                });
+                tbody.querySelectorAll("[data-reset-id]").forEach((btn) => {
+                    btn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        resetCase(btn.dataset.resetId);
                     });
                 });
             } catch (err) {

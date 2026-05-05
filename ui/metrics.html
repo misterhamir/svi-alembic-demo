@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI Alembic - Metrics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #031634;
+            --color-primary-hover: #1A2B4A;
+            --color-primary-light: #f2f4f6;
+            --color-background: #f8f9fb;
+            --color-surface: #f2f4f6;
+            --color-text-primary: #031634;
+            --color-text-secondary: #44474e;
+            --color-border: #e1e2e4;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+        @layer base { body { @apply bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex; } }
+    </style>
+</head>
+
+<body class="bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <div class="flex h-full w-64 flex-col border-r border-border bg-background shrink-0">
+        <div class="flex h-16 shrink-0 items-center px-6 border-b border-border">
+            <img src="SVI_logo/alembic-for-light-bg.png" alt="SVI Alembic logo" class="h-8 w-auto object-contain" />
+        </div>
+        <div class="flex flex-1 flex-col overflow-y-auto px-3 py-6">
+            <nav class="flex-1 space-y-1">
+                <a href="operator-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+                    My Queue
+                </a>
+                <a href="approvals-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Approvals
+                </a>
+                <a href="dashboard.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    Dashboard
+                </a>
+                <a href="canvas-editor.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>
+                    Workflow
+                </a>
+                <a href="metrics.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors bg-primary-light text-primary border-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                    Metrics
+                </a>
+                <a href="flywheel.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Flywheel
+                </a>
+            </nav>
+        </div>
+        <div class="border-t border-border p-4">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-full bg-surface border border-border flex items-center justify-center text-sm font-medium text-text-primary">JD</div>
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium text-text-primary">John Doe</span>
+                    <span class="text-xs text-text-secondary">Operator</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto">
+        <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-8">
+            <h1 class="text-lg font-bold uppercase tracking-wide text-text-primary">MODEL PERFORMANCE</h1>
+            <div class="flex items-center gap-3">
+                <span id="header-docs" class="text-xs text-text-secondary">Last 30 days · — documents processed</span>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-7xl w-full mx-auto space-y-8">
+
+            <!-- KPI strip -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Overall Accuracy</div>
+                    <div class="mt-2 text-3xl font-bold text-emerald-700" id="kpi-accuracy">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">across all fields</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Avg Confidence</div>
+                    <div class="mt-2 text-3xl font-bold text-primary" id="kpi-confidence">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">per extracted field</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Cost / Document</div>
+                    <div class="mt-2 text-3xl font-bold text-text-primary" id="kpi-cost">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">Gemini API cost</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Avg Latency</div>
+                    <div class="mt-2 text-3xl font-bold text-text-primary" id="kpi-latency">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">extraction time</div>
+                </div>
+            </section>
+
+            <!-- Two charts row -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Field accuracy bars -->
+                <div class="md:col-span-2 bg-white rounded-lg border border-border shadow-sm p-6">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary mb-4">Accuracy by Field</h2>
+                    <div style="height: 280px; position: relative;">
+                        <canvas id="field-accuracy-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Confidence distribution donut -->
+                <div class="bg-white rounded-lg border border-border shadow-sm p-6 flex flex-col">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary mb-4">Confidence Distribution</h2>
+                    <div class="flex-1 flex items-center justify-center" style="min-height: 200px;">
+                        <div style="width: 220px; height: 220px; position: relative;">
+                            <canvas id="confidence-chart"></canvas>
+                        </div>
+                    </div>
+                    <div id="conf-legend" class="mt-4 space-y-1.5"></div>
+                </div>
+            </section>
+
+            <!-- Daily throughput -->
+            <section class="bg-white rounded-lg border border-border shadow-sm p-6">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary mb-4">Daily Throughput — Last 14 Days</h2>
+                <div style="height: 180px; position: relative;">
+                    <canvas id="throughput-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Field accuracy table -->
+            <section>
+                <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary mb-3">Field-Level Detail</h2>
+                <div class="bg-white rounded-lg border border-border shadow-sm overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-surface border-b border-border text-left">
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Field</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary text-right">Accuracy</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary text-right">Samples</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Quality</th>
+                            </tr>
+                        </thead>
+                        <tbody id="field-rows" class="divide-y divide-border">
+                            <tr><td colspan="4" class="px-4 py-8 text-center text-text-secondary text-sm">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        function pct(n) { return n != null ? `${Math.round(n * 100)}%` : "—"; }
+
+        async function loadMetrics() {
+            let data;
+            try {
+                const r = await fetch("/api/metrics");
+                data = await r.json();
+            } catch (e) {
+                return;
+            }
+
+            // Header doc count
+            document.getElementById("header-docs").textContent =
+                `Last 30 days · ${data.total_cases_processed.toLocaleString()} documents processed`;
+
+            // KPIs
+            document.getElementById("kpi-accuracy").textContent = pct(data.overall_accuracy);
+            document.getElementById("kpi-confidence").textContent = pct(data.avg_confidence);
+            document.getElementById("kpi-cost").textContent = data.cost_per_doc_usd != null ? `$${data.cost_per_doc_usd.toFixed(3)}` : "—";
+            document.getElementById("kpi-latency").textContent = data.avg_latency_ms != null ? `${(data.avg_latency_ms / 1000).toFixed(1)}s` : "—";
+
+            // Field accuracy horizontal bar chart
+            const fields = data.field_accuracy;
+            const fieldCtx = document.getElementById("field-accuracy-chart").getContext("2d");
+            new Chart(fieldCtx, {
+                type: "bar",
+                data: {
+                    labels: fields.map((f) => f.field),
+                    datasets: [{
+                        label: "Accuracy",
+                        data: fields.map((f) => Math.round(f.accuracy * 100)),
+                        backgroundColor: fields.map((f) =>
+                            f.accuracy >= 0.90 ? "rgba(16,185,129,0.75)" :
+                            f.accuracy >= 0.85 ? "rgba(245,158,11,0.65)" :
+                            "rgba(239,68,68,0.65)"
+                        ),
+                        borderRadius: 4,
+                    }],
+                },
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.x}%` } },
+                    },
+                    scales: {
+                        x: {
+                            min: 60, max: 100,
+                            ticks: { callback: (v) => `${v}%`, font: { family: "Inter", size: 10 } },
+                            grid: { color: "#e1e2e4" },
+                        },
+                        y: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
+                    },
+                },
+            });
+
+            // Confidence distribution donut
+            const dist = data.confidence_distribution;
+            const confCtx = document.getElementById("confidence-chart").getContext("2d");
+            new Chart(confCtx, {
+                type: "doughnut",
+                data: {
+                    labels: ["High (≥85%)", "Medium (70–85%)", "Low (<70%)"],
+                    datasets: [{
+                        data: [dist.green, dist.amber, dist.red],
+                        backgroundColor: ["#10b981", "#f59e0b", "#ef4444"],
+                        borderWidth: 2,
+                        borderColor: "#fff",
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "68%",
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%` } },
+                    },
+                },
+            });
+            document.getElementById("conf-legend").innerHTML = [
+                { label: "High confidence (≥85%)", color: "#10b981", val: dist.green },
+                { label: "Medium (70–85%)",         color: "#f59e0b", val: dist.amber },
+                { label: "Low (<70%)",               color: "#ef4444", val: dist.red },
+            ].map((l) => `
+                <div class="flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${l.color}"></div>
+                        <span class="text-text-secondary">${l.label}</span>
+                    </div>
+                    <span class="font-bold text-text-primary">${l.val}%</span>
+                </div>`).join("");
+
+            // Daily throughput bar chart
+            const tp = data.daily_throughput;
+            const tpCtx = document.getElementById("throughput-chart").getContext("2d");
+            new Chart(tpCtx, {
+                type: "bar",
+                data: {
+                    labels: tp.map((d) => d.date),
+                    datasets: [{
+                        label: "Documents",
+                        data: tp.map((d) => d.count),
+                        backgroundColor: "rgba(3,22,52,0.7)",
+                        borderRadius: 3,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y} docs` } },
+                    },
+                    scales: {
+                        x: { ticks: { font: { family: "Inter", size: 10 } }, grid: { display: false } },
+                        y: { ticks: { font: { family: "Inter", size: 10 } }, grid: { color: "#e1e2e4" } },
+                    },
+                },
+            });
+
+            // Field detail table
+            const tbody = document.getElementById("field-rows");
+            tbody.innerHTML = fields.map((f) => {
+                const acc = f.accuracy;
+                const color = acc >= 0.90 ? "text-emerald-700" : acc >= 0.85 ? "text-amber-700" : "text-red-700";
+                const quality = acc >= 0.90 ? { label: "Good", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" }
+                              : acc >= 0.85 ? { label: "Review", cls: "bg-amber-50 text-amber-700 border-amber-200" }
+                              :               { label: "Needs Work", cls: "bg-red-50 text-red-700 border-red-200" };
+                return `
+                    <tr class="hover:bg-surface/40">
+                        <td class="px-4 py-3 font-medium text-text-primary">${f.field}</td>
+                        <td class="px-4 py-3 text-right font-bold font-mono ${color}">${pct(acc)}</td>
+                        <td class="px-4 py-3 text-right text-text-secondary text-xs">${f.count}</td>
+                        <td class="px-4 py-3">
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${quality.cls}">${quality.label}</span>
+                        </td>
+                    </tr>`;
+            }).join("");
+        }
+
+        loadMetrics();
+    </script>
+
+</body>
+</html>

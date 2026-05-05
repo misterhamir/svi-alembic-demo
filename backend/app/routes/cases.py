@@ -235,3 +235,33 @@ async def retry(case_id: str):
         return await state_machine.retry(case_id)
     except TransitionError as e:
         raise HTTPException(status_code=409, detail=str(e))
+
+
+@router.post("/cases/{case_id}/reset")
+async def reset_case(case_id: str):
+    """Demo-only: reset a case back to pending_review with original AI extractions."""
+    case = await storage.get_case(case_id)
+    if case is None:
+        raise HTTPException(status_code=404, detail="Case not found")
+
+    # Reset state
+    case["state"] = "pending_review"
+    # Clear integration artefacts
+    case.pop("integration_error", None)
+    case.pop("integration_result", None)
+    # Reset all fields back to AI provenance (undo human corrections)
+    for doc in case.get("documents", []):
+        for field in doc.get("fields", []):
+            if field.get("provenance") == "human":
+                field["provenance"] = "ai"
+                field.pop("history", None)
+    # Replace history with a single reset event
+    case["history"] = [{
+        "at": storage._now_iso(),
+        "actor": "demo_reset",
+        "event": "demo_reset",
+        "detail": {"note": "Case reset for demo purposes"},
+    }]
+
+    await storage.force_save(case)
+    return {"ok": True, "case_id": case_id, "state": "pending_review"}

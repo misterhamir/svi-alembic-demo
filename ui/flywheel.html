@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVI Alembic - AI Flywheel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-primary: #031634;
+            --color-primary-hover: #1A2B4A;
+            --color-primary-light: #f2f4f6;
+            --color-background: #f8f9fb;
+            --color-surface: #f2f4f6;
+            --color-text-primary: #031634;
+            --color-text-secondary: #44474e;
+            --color-border: #e1e2e4;
+            --font-sans: 'Inter', system-ui, sans-serif;
+        }
+        @layer base { body { @apply bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex; } }
+    </style>
+</head>
+
+<body class="bg-[#f9fafb] text-text-primary font-sans antialiased m-0 h-screen w-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <div class="flex h-full w-64 flex-col border-r border-border bg-background shrink-0">
+        <div class="flex h-16 shrink-0 items-center px-6 border-b border-border">
+            <img src="SVI_logo/alembic-for-light-bg.png" alt="SVI Alembic logo" class="h-8 w-auto object-contain" />
+        </div>
+        <div class="flex flex-1 flex-col overflow-y-auto px-3 py-6">
+            <nav class="flex-1 space-y-1">
+                <a href="operator-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+                    My Queue
+                </a>
+                <a href="approvals-queue.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Approvals
+                </a>
+                <a href="dashboard.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                    Dashboard
+                </a>
+                <a href="canvas-editor.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6a3 3 0 0 0 3 3h6"/></svg>
+                    Workflow
+                </a>
+                <a href="metrics.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors border-transparent text-text-secondary hover:bg-surface hover:text-text-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                    Metrics
+                </a>
+                <a href="flywheel.html" class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full border-l-4 transition-colors bg-primary-light text-primary border-primary">
+                    <svg class="mr-3 h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Flywheel
+                </a>
+            </nav>
+        </div>
+        <div class="border-t border-border p-4">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-full bg-surface border border-border flex items-center justify-center text-sm font-medium text-text-primary">JD</div>
+                <div class="flex flex-col">
+                    <span class="text-sm font-medium text-text-primary">John Doe</span>
+                    <span class="text-xs text-text-secondary">Operator</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-1 flex flex-col min-w-0 bg-background overflow-y-auto">
+        <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-8">
+            <div>
+                <h1 class="text-lg font-bold uppercase tracking-wide text-text-primary">AI FLYWHEEL</h1>
+                <p class="text-xs text-text-secondary -mt-0.5">Human corrections → prompt optimization → higher accuracy</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="status-badge" class="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border">—</span>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-6xl w-full mx-auto space-y-8">
+
+            <!-- KPI strip -->
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Total Corrections</div>
+                    <div class="mt-2 text-3xl font-bold text-text-primary" id="kpi-total-corrections">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">all-time operator edits</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">This Month</div>
+                    <div class="mt-2 text-3xl font-bold text-primary" id="kpi-this-month">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">corrections collected</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Last Accuracy Gain</div>
+                    <div class="mt-2 text-3xl font-bold text-emerald-700" id="kpi-accuracy-gain">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">from last optimization run</div>
+                </div>
+                <div class="bg-white rounded-lg border border-border p-5 shadow-sm">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-text-secondary">Optimization Runs</div>
+                    <div class="mt-2 text-3xl font-bold text-text-primary" id="kpi-runs">—</div>
+                    <div class="mt-1 text-xs text-text-secondary">prompt versions generated</div>
+                </div>
+            </section>
+
+            <!-- Progress to next run -->
+            <section class="bg-white rounded-lg border border-border shadow-sm p-6">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary">Progress to Next Optimization</h2>
+                        <p class="text-xs text-text-secondary mt-0.5">Each batch of <span id="threshold-label">10</span> corrections triggers a new BootstrapFewShot prompt optimization run.</p>
+                    </div>
+                    <span id="progress-label" class="text-sm font-bold text-primary">—</span>
+                </div>
+                <div class="w-full bg-surface rounded-full h-3 overflow-hidden border border-border">
+                    <div id="progress-bar" class="h-3 bg-primary rounded-full transition-all duration-700" style="width: 0%"></div>
+                </div>
+                <p class="text-xs text-text-secondary mt-2" id="progress-caption">—</p>
+            </section>
+
+            <!-- Accuracy trend chart -->
+            <section class="bg-white rounded-lg border border-border shadow-sm p-6">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary mb-4">Accuracy Trend Across Optimization Runs</h2>
+                <div style="height: 240px; position: relative;">
+                    <canvas id="accuracy-chart"></canvas>
+                </div>
+            </section>
+
+            <!-- Optimization run history -->
+            <section>
+                <h2 class="text-sm font-bold uppercase tracking-widest text-text-secondary mb-3">Optimization Run History</h2>
+                <div class="bg-white rounded-lg border border-border shadow-sm overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-surface border-b border-border text-left">
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Run</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Date</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary text-right">Before</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary text-right">After</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary text-right">Gain</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary text-right">Corrections</th>
+                                <th class="px-4 py-3 text-[10px] font-semibold uppercase tracking-widest text-text-secondary">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="run-rows" class="divide-y divide-border">
+                            <tr><td colspan="7" class="px-4 py-8 text-center text-text-secondary text-sm">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- How it works -->
+            <section class="bg-primary/5 border border-primary/10 rounded-lg p-6">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-primary mb-4">How the Flywheel Works</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">1</div>
+                        <div class="text-sm font-bold text-text-primary">Operator Corrects</div>
+                        <div class="text-xs text-text-secondary">Operator flags wrong/partial fields and provides correct values during HITL review.</div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">2</div>
+                        <div class="text-sm font-bold text-text-primary">Corrections Accumulate</div>
+                        <div class="text-xs text-text-secondary">Each correction is stored as a (document, field, wrong value, correct value) training example.</div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">3</div>
+                        <div class="text-sm font-bold text-text-primary">DSPy Optimizes Prompt</div>
+                        <div class="text-xs text-text-secondary">BootstrapFewShot selects the best few-shot examples and rewrites the extraction prompt.</div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold">4</div>
+                        <div class="text-sm font-bold text-text-primary">Accuracy Improves</div>
+                        <div class="text-xs text-text-secondary">New prompt is evaluated on held-out cases and activated if accuracy improves.</div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+        function formatDate(iso) {
+            if (!iso) return "—";
+            const d = new Date(iso);
+            return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        }
+
+        function pct(n) { return `${Math.round(n * 100)}%`; }
+
+        async function loadFlywheel() {
+            let data;
+            try {
+                const r = await fetch("/api/flywheel");
+                data = await r.json();
+            } catch (e) {
+                return;
+            }
+
+            // KPIs
+            document.getElementById("kpi-total-corrections").textContent = data.total_corrections;
+            document.getElementById("kpi-this-month").textContent = data.corrections_this_month;
+            document.getElementById("kpi-accuracy-gain").textContent = data.last_run_accuracy_gain != null ? `+${Math.round(data.last_run_accuracy_gain * 100)}pp` : "—";
+            document.getElementById("kpi-runs").textContent = data.optimization_runs.length;
+
+            // Status badge
+            const badge = document.getElementById("status-badge");
+            const runCount = data.optimization_runs.length;
+            if (runCount > 0) {
+                badge.textContent = `● Active — Prompt v${runCount} deployed`;
+                badge.className = "text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200";
+            } else {
+                badge.textContent = "● Collecting corrections…";
+                badge.className = "text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border bg-amber-50 text-amber-700 border-amber-200";
+            }
+
+            // Progress bar
+            const threshold = data.next_run_threshold;
+            const progress = threshold - data.corrections_to_next_run;
+            const pctProgress = Math.round((progress / threshold) * 100);
+            document.getElementById("threshold-label").textContent = threshold;
+            document.getElementById("progress-bar").style.width = `${pctProgress}%`;
+            document.getElementById("progress-label").textContent = `${progress} / ${threshold}`;
+            document.getElementById("progress-caption").textContent =
+                `${data.corrections_to_next_run} more correction${data.corrections_to_next_run === 1 ? "" : "s"} needed to trigger the next optimization run.`;
+
+            // Accuracy chart (skip if no runs yet)
+            if (data.optimization_runs.length === 0) {
+                document.getElementById("accuracy-chart").closest("section")?.querySelector(".chart-empty-state")?.classList.remove("hidden");
+            }
+            const runs = [...data.optimization_runs].reverse();
+            const labels = runs.map((r) => r.run_id.replace("run_", "v"));
+            const beforeData = runs.map((r) => Math.round(r.accuracy_before * 100));
+            const afterData = runs.map((r) => Math.round(r.accuracy_after * 100));
+
+            const ctx = document.getElementById("accuracy-chart").getContext("2d");
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: "Before Optimization",
+                            data: beforeData,
+                            borderColor: "#f59e0b",
+                            backgroundColor: "rgba(245,158,11,0.08)",
+                            borderWidth: 2,
+                            pointRadius: 5,
+                            pointBackgroundColor: "#f59e0b",
+                            tension: 0.3,
+                        },
+                        {
+                            label: "After Optimization",
+                            data: afterData,
+                            borderColor: "#10b981",
+                            backgroundColor: "rgba(16,185,129,0.1)",
+                            borderWidth: 2,
+                            pointRadius: 5,
+                            pointBackgroundColor: "#10b981",
+                            tension: 0.3,
+                            fill: true,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: "top", labels: { font: { family: "Inter", size: 11 }, boxWidth: 12 } },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y}%` } },
+                    },
+                    scales: {
+                        y: {
+                            min: 60,
+                            max: 100,
+                            ticks: { callback: (v) => `${v}%`, font: { family: "Inter", size: 11 } },
+                            grid: { color: "#e1e2e4" },
+                        },
+                        x: { ticks: { font: { family: "Inter", size: 11 } }, grid: { display: false } },
+                    },
+                },
+            });
+
+            // Run history table
+            const tbody = document.getElementById("run-rows");
+            if (data.optimization_runs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-text-secondary text-sm">No optimization runs yet — collect ${data.next_run_threshold} corrections to trigger the first run.</td></tr>`;
+            } else
+            tbody.innerHTML = data.optimization_runs.map((r) => {
+                const gain = r.accuracy_after - r.accuracy_before;
+                const isActive = r.status === "active";
+                return `
+                    <tr class="${isActive ? "bg-emerald-50/40" : ""}">
+                        <td class="px-4 py-3 font-mono text-xs font-bold text-text-primary">${escapeHtml(r.run_id)}</td>
+                        <td class="px-4 py-3 text-xs text-text-secondary">${formatDate(r.ran_at)}</td>
+                        <td class="px-4 py-3 text-xs text-right font-mono text-amber-700">${pct(r.accuracy_before)}</td>
+                        <td class="px-4 py-3 text-xs text-right font-mono text-emerald-700 font-bold">${pct(r.accuracy_after)}</td>
+                        <td class="px-4 py-3 text-xs text-right font-bold text-emerald-700">+${Math.round(gain * 100)}pp</td>
+                        <td class="px-4 py-3 text-xs text-right text-text-secondary">${r.corrections_used} corrections · ${r.eval_cases} eval cases</td>
+                        <td class="px-4 py-3">
+                            ${isActive
+                                ? `<span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-emerald-50 text-emerald-700 border-emerald-200">● Active</span>`
+                                : `<span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-surface text-text-secondary border-border">Superseded</span>`
+                            }
+                        </td>
+                    </tr>`;
+            }).join("");
+        }
+
+        loadFlywheel();
+    </script>
+
+</body>
+</html>

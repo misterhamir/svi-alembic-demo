@@ -276,6 +276,70 @@ async def update_field(
     return target_field
 
 
+async def get_case_stats() -> dict[str, Any]:
+    """Aggregate field and correction stats across all cases for metrics/flywheel."""
+    async with _connect() as db:
+        async with db.execute("SELECT payload FROM cases") as cur:
+            rows = await cur.fetchall()
+
+    total_fields = 0
+    total_corrections = 0
+    confidence_values: list[float] = []
+    field_stats: dict[str, dict[str, int]] = {}  # name -> {total, corrections}
+    case_dates: list[str] = []                    # YYYY-MM-DD
+    correction_dates: list[str] = []              # YYYY-MM-DD of each correction
+
+    for row in rows:
+        case = json.loads(row["payload"])
+        created_at = case.get("created_at", "")
+        if created_at:
+            case_dates.append(created_at[:10])
+
+        for doc in case.get("documents", []):
+            for field in doc.get("fields", []):
+                total_fields += 1
+                fname = field.get("name", "unknown")
+                conf = field.get("confidence")
+                if conf is not None:
+                    try:
+                        confidence_values.append(float(conf))
+                    except (TypeError, ValueError):
+                        pass
+
+                fs = field_stats.setdefault(fname, {"total": 0, "corrections": 0})
+                fs["total"] += 1
+
+                if field.get("provenance") == "human":
+                    total_corrections += 1
+                    fs["corrections"] += 1
+                    for h in field.get("history", []):
+                        if "from" in h and h.get("at"):
+                            correction_dates.append(h["at"][:10])
+                            break
+
+    return {
+        "case_count": len(rows),
+        "total_fields": total_fields,
+        "total_corrections": total_corrections,
+        "confidence_values": confidence_values,
+        "field_stats": field_stats,
+        "case_dates": case_dates,
+        "correction_dates": correction_dates,
+    }
+
+
+async def force_save(case: dict[str, Any]) -> None:
+    """Overwrite the stored payload and state for a case. Used by demo reset."""
+    case_id = case["case_id"]
+    async with _connect() as db:
+        await db.execute(
+            "UPDATE cases SET state = ?, payload = ? WHERE case_id = ?",
+            (case["state"], json.dumps(case), case_id),
+        )
+        await db.commit()
+    logger.info("case %s force-saved (state=%s)", case_id, case["state"])
+
+
 async def wipe_all() -> None:
     """Hard reset: delete every case. Used by scripts/reset.py."""
     async with _connect() as db:

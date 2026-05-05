@@ -23,6 +23,8 @@ from fastapi.staticfiles import StaticFiles
 from . import mock_erp, storage, workflows
 from .config import get_settings
 from .routes import cases as cases_routes
+from .routes import metrics as metrics_routes
+from .routes import flywheel as flywheel_routes
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +84,8 @@ def create_app() -> FastAPI:
     app.include_router(cases_routes.router)
     app.include_router(mock_erp.router)
     app.include_router(workflows.router)
+    app.include_router(metrics_routes.router)
+    app.include_router(flywheel_routes.router)
 
     # Static UI mount. The svi-alembic-ui screens live in ../ui/ relative
     # to backend/, copied in during Phase 4 / Phase 6. The mount is created
