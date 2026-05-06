@@ -237,6 +237,13 @@ async def retry(case_id: str):
         raise HTTPException(status_code=409, detail=str(e))
 
 
+@router.post("/cases/reset-all")
+async def reset_all_cases():
+    """Demo-only: wipe all cases from the database."""
+    await storage.wipe_all()
+    return {"ok": True}
+
+
 @router.post("/cases/{case_id}/reset")
 async def reset_case(case_id: str):
     """Demo-only: reset a case back to pending_review with original AI extractions."""

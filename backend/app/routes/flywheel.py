@@ -11,7 +11,7 @@ from .. import storage
 
 router = APIRouter()
 
-NEXT_RUN_THRESHOLD = 10  # corrections needed per optimization run
+NEXT_RUN_THRESHOLD = 5  # corrections needed per optimization run
 
 
 @router.get("/api/flywheel")
@@ -19,9 +19,11 @@ async def get_flywheel() -> JSONResponse:
     stats = await storage.get_case_stats()
     total_corrections = stats["total_corrections"]
 
-    corrections_to_next = NEXT_RUN_THRESHOLD - (total_corrections % NEXT_RUN_THRESHOLD)
-    if corrections_to_next == NEXT_RUN_THRESHOLD:
-        corrections_to_next = 0
+    if total_corrections == 0:
+        corrections_to_next = NEXT_RUN_THRESHOLD
+    else:
+        remainder = total_corrections % NEXT_RUN_THRESHOLD
+        corrections_to_next = 0 if remainder == 0 else NEXT_RUN_THRESHOLD - remainder
 
     # Build optimization run history purely from correction count
     runs_completed = total_corrections // NEXT_RUN_THRESHOLD
